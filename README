@@ -1,0 +1,62 @@
+STARTER Debugger
+================
+
+Interactive CLI debugger for starter-core. Attaches to the optional remote
+debug server (`org.starter.Core.Debug`) exposed when core is built with
+`--enable-debug-server`.
+
+Build
+-----
+
+    ./autogen.sh
+    ./configure
+    make
+    sudo make install
+
+Requires: GLib/GIO, flex, bison, libreadline.
+
+Tests
+-----
+
+    make check
+
+`test/test-debugger` drives the session and CLI against an in-process mock
+of `org.starter.Core.Debug` (no live starter-core required).
+
+Usage
+-----
+
+Start starter-core with the debug server enabled, then:
+
+    starter-debugger
+    starter-debugger --core=127.0.0.1:17373
+
+Default attach address is 127.0.0.1:17373.
+
+At the `(starter)` prompt:
+
+    help
+    status
+    info peers | info io [FILTER] | info vars [FILTER]
+    info break | info watch
+    monitor [all|on|off]
+    monitor inputs|outputs|io|stats|vars|peers|stopped [on|off]
+    break ID | watch ID
+    delete break HANDLE | delete watch HANDLE
+    continue
+    set input ID = VALUE | set output ID = VALUE
+    source examples/session.stdbg
+    quit
+
+`info io` / `info vars` show values observed via debug signals since attach
+(there is no full I/O snapshot method on the core debug interface yet).
+
+Breakpoints pause before rule apply for an id; watchpoints pause on value change.
+Use `continue` after a `Stopped` event.
+
+Command history is stored in ~/.starter-debugger_history.
+
+License
+-------
+
+GNU General Public License version 3 or later. See COPYING.

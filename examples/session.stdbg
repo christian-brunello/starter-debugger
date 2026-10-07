@@ -1,0 +1,13 @@
+# Example starter-debugger script (no preprocessor).
+help
+info peers
+info break
+info watch
+monitor on
+# Example control flow (ids depend on your live services):
+#   watch time:second
+#   break EnelEM:meter0power
+#   set input time:second = 0
+#   continue
+#   delete watch 1
+status

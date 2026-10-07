@@ -1,0 +1,60 @@
+# Autotools / configure output
+Makefile
+Makefile.in
+autom4te.cache/
+config.log
+config.status
+config.h
+config.h.in
+libtool
+configure
+configure~
+stamp-h1
+src/stamp-h1
+src/config.h
+src/config.h.in
+acl*
+ar-lib
+compile
+config.guess
+config.sub
+depcomp
+install-sh
+ltmain.sh
+missing
+test-driver
+m4/libtool.m4
+m4/lt*.m4
+
+# Libtool / compiler products
+.deps/
+.libs/
+*.o
+*.lo
+*.la
+*.a
+*.so
+*.d
+
+# Generated parser / lexer
+src/cmd.c
+src/cmd.h
+src/lex.c
+src/y.tab.c
+src/y.tab.h
+
+# Built programs
+/src/starter-debugger
+/test/test-debugger
+
+# Editor / OS junk
+*~
+*.swp
+*.swo
+.DS_Store
+
+# Local debug output
+*.log
+core
+core.*
+vgcore.*
