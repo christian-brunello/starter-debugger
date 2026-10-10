@@ -42,7 +42,7 @@ STDbgExec *st_dbg_yy_exec = NULL;
 
 %token T_HELP T_QUIT T_STATUS T_SOURCE T_INFO T_MONITOR
 %token T_PEERS T_IO T_VARS T_ON T_OFF T_ALL T_STATS T_STOPPED
-%token T_INPUTS T_OUTPUTS
+%token T_INPUTS T_OUTPUTS T_RULES T_TRIGGERS T_ENGINE
 %token T_BREAK T_WATCH T_DELETE T_CONTINUE T_SET T_INPUT T_OUTPUT
 %token <sval> T_STRING T_WORD
 %token <dval> T_NUMBER
@@ -157,17 +157,20 @@ filter_opt
   ;
 
 channel
-  : T_INPUTS  { $$ = g_strdup ("inputs"); }
-  | T_INPUT   { $$ = g_strdup ("input"); }
-  | T_OUTPUTS { $$ = g_strdup ("outputs"); }
-  | T_OUTPUT  { $$ = g_strdup ("output"); }
-  | T_IO      { $$ = g_strdup ("io"); }
-  | T_STATS   { $$ = g_strdup ("stats"); }
-  | T_VARS    { $$ = g_strdup ("vars"); }
-  | T_PEERS   { $$ = g_strdup ("peers"); }
-  | T_STOPPED { $$ = g_strdup ("stopped"); }
-  | T_WORD    { $$ = $1; }
-  | T_STRING  { $$ = $1; }
+  : T_INPUTS    { $$ = g_strdup ("inputs"); }
+  | T_INPUT     { $$ = g_strdup ("input"); }
+  | T_OUTPUTS   { $$ = g_strdup ("outputs"); }
+  | T_OUTPUT    { $$ = g_strdup ("output"); }
+  | T_IO        { $$ = g_strdup ("io"); }
+  | T_STATS     { $$ = g_strdup ("stats"); }
+  | T_VARS      { $$ = g_strdup ("vars"); }
+  | T_PEERS     { $$ = g_strdup ("peers"); }
+  | T_STOPPED   { $$ = g_strdup ("stopped"); }
+  | T_RULES     { $$ = g_strdup ("rules"); }
+  | T_TRIGGERS  { $$ = g_strdup ("triggers"); }
+  | T_ENGINE    { $$ = g_strdup ("engine"); }
+  | T_WORD      { $$ = $1; }
+  | T_STRING    { $$ = $1; }
   ;
 
 handle

@@ -80,8 +80,11 @@ typedef enum
   ST_DBG_MON_VARS = 1 << 3,
   ST_DBG_MON_PEERS = 1 << 4,
   ST_DBG_MON_STOPPED = 1 << 5,
+  ST_DBG_MON_RULES = 1 << 6,
+  ST_DBG_MON_TRIGGERS = 1 << 7,
   ST_DBG_MON_ALL = (ST_DBG_MON_INPUTS | ST_DBG_MON_OUTPUTS | ST_DBG_MON_STATS
-		    | ST_DBG_MON_VARS | ST_DBG_MON_PEERS | ST_DBG_MON_STOPPED)
+		    | ST_DBG_MON_VARS | ST_DBG_MON_PEERS | ST_DBG_MON_STOPPED
+		    | ST_DBG_MON_RULES | ST_DBG_MON_TRIGGERS)
 } STDbgMonitorMask;
 
 void st_dbg_session_set_monitor (STDbgSession * self, gboolean on);
@@ -91,7 +94,7 @@ guint st_dbg_session_get_monitor_mask (STDbgSession * self);
 void st_dbg_session_monitor_set_channel (STDbgSession * self, guint bits,
 					 gboolean enable);
 void st_dbg_session_print_monitor (STDbgSession * self);
-/* Parse channel name -> bits. Accepts all/inputs/input/io/outputs/... */
+/* Parse channel name -> bits. Accepts all/inputs/io/.../rules/triggers/engine. */
 gboolean st_dbg_session_parse_monitor_channel (const gchar * name,
 					       guint * bits_out);
 

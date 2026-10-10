@@ -224,6 +224,32 @@ test_list_io_snapshot (Fixture * f, gconstpointer user_data)
 }
 
 static void
+test_monitor_rules_triggers (Fixture * f, gconstpointer user_data)
+{
+  STDbgExec exec;
+
+  (void) user_data;
+  memset (&exec, 0, sizeof (exec));
+  exec.session = f->session;
+
+  /* Enable only rules: emit must not crash; channel filters apply. */
+  g_assert_true (st_dbg_exec_line (&exec, "monitor rules"));
+  st_dbg_mock_server_emit_rule_triggered (f->mock, "beep:status",
+					  "SET 1 WHEN (time:hour) == 7");
+  st_dbg_mock_server_emit_trigger_triggered (f->mock, "alarm_active",
+					     "TRIGGER WHEN x SET y = 1");
+  wait_ms (80);
+
+  g_assert_true (st_dbg_exec_line (&exec, "monitor triggers"));
+  g_assert_cmpuint (st_dbg_session_get_monitor_mask (f->session), ==,
+		    ST_DBG_MON_RULES | ST_DBG_MON_TRIGGERS);
+  st_dbg_mock_server_emit_trigger_triggered (f->mock, "alarm_active",
+					     "TRIGGER WHEN x SET y = 1");
+  wait_ms (50);
+  g_assert_true (st_dbg_exec_line (&exec, "monitor off"));
+}
+
+static void
 test_commands_cli (Fixture * f, gconstpointer user_data)
 {
   STDbgExec exec;
@@ -259,6 +285,17 @@ test_commands_cli (Fixture * f, gconstpointer user_data)
   g_assert_true (st_dbg_exec_line (&exec, "monitor all"));
   g_assert_cmpuint (st_dbg_session_get_monitor_mask (f->session), ==,
 		    ST_DBG_MON_ALL);
+  g_assert_true (st_dbg_exec_line (&exec, "monitor off"));
+  g_assert_true (st_dbg_exec_line (&exec, "monitor rules"));
+  g_assert_cmpuint (st_dbg_session_get_monitor_mask (f->session), ==,
+		    ST_DBG_MON_RULES);
+  g_assert_true (st_dbg_exec_line (&exec, "monitor triggers on"));
+  g_assert_cmpuint (st_dbg_session_get_monitor_mask (f->session), ==,
+		    ST_DBG_MON_RULES | ST_DBG_MON_TRIGGERS);
+  g_assert_true (st_dbg_exec_line (&exec, "monitor off"));
+  g_assert_true (st_dbg_exec_line (&exec, "monitor engine"));
+  g_assert_cmpuint (st_dbg_session_get_monitor_mask (f->session), ==,
+		    ST_DBG_MON_RULES | ST_DBG_MON_TRIGGERS);
   g_assert_true (st_dbg_exec_line (&exec, "monitor off"));
 
   g_assert_true (st_dbg_exec_line (&exec, "break sensor:temp"));
@@ -310,6 +347,8 @@ main (int argc, char **argv)
 	      test_input_signal_shadow, fixture_teardown);
   g_test_add ("/debugger/list-io-snapshot", Fixture, NULL, fixture_setup,
 	      test_list_io_snapshot, fixture_teardown);
+  g_test_add ("/debugger/monitor-rules-triggers", Fixture, NULL, fixture_setup,
+	      test_monitor_rules_triggers, fixture_teardown);
   g_test_add ("/debugger/commands-cli", Fixture, NULL, fixture_setup,
 	      test_commands_cli, fixture_teardown);
 

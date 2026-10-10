@@ -41,7 +41,7 @@ st_dbg_cmd_help (STDbgExec * exec)
   g_print ("info break               -- list breakpoints\n");
   g_print ("info watch               -- list watchpoints\n");
   g_print ("monitor [all|on|off]     -- live signals (all channels)\n");
-  g_print ("monitor CHANNEL [on|off] -- inputs|outputs|io|stats|vars|peers|stopped\n");
+  g_print ("monitor CHANNEL [on|off] -- inputs|outputs|io|stats|vars|peers|stopped|rules|triggers|engine\n");
   g_print ("break, b ID              -- breakpoint on identifier\n");
   g_print ("watch, w ID              -- watchpoint on value change\n");
   g_print ("delete break HANDLE      -- remove breakpoint\n");
@@ -178,7 +178,7 @@ st_dbg_cmd_monitor (STDbgExec * exec, const gchar * channel,
   if (!st_dbg_session_parse_monitor_channel (channel, &bits))
     {
       g_printerr ("monitor: unknown channel '%s'\n", channel);
-      g_printerr ("  channels: all inputs outputs io stats vars peers stopped\n");
+      g_printerr ("  channels: all inputs outputs io stats vars peers stopped rules triggers engine\n");
       return;
     }
 

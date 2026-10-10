@@ -46,6 +46,12 @@ void st_dbg_mock_server_emit_input (STDbgMockServer * self, const gchar * id,
 void st_dbg_mock_server_emit_stopped (STDbgMockServer * self,
 				      const gchar * reason, const gchar * id,
 				      gdouble value, guint handle);
+void st_dbg_mock_server_emit_rule_triggered (STDbgMockServer * self,
+					     const gchar * dest,
+					     const gchar * describe);
+void st_dbg_mock_server_emit_trigger_triggered (STDbgMockServer * self,
+						const gchar * dest,
+						const gchar * describe);
 
 gboolean st_dbg_mock_server_is_paused (STDbgMockServer * self);
 guint st_dbg_mock_server_n_breakpoints (STDbgMockServer * self);

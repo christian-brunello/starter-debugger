@@ -58,6 +58,9 @@ SQUOTE  '([^'\\]|\\.)*'
 (?i:stopped)            { return T_STOPPED; }
 (?i:inputs)             { return T_INPUTS; }
 (?i:outputs)            { return T_OUTPUTS; }
+(?i:rules)              { return T_RULES; }
+(?i:triggers)           { return T_TRIGGERS; }
+(?i:engine)             { return T_ENGINE; }
 (?i:break)              { return T_BREAK; }
 (?i:b)                  { return T_BREAK; }
 (?i:watch)              { return T_WATCH; }

@@ -153,6 +153,14 @@ static const gchar introspection_xml[] =
   "      <arg name='name' type='s'/>"
   "      <arg name='describe' type='s'/>"
   "    </signal>"
+  "    <signal name='RuleTriggered'>"
+  "      <arg name='dest' type='s'/>"
+  "      <arg name='describe' type='s'/>"
+  "    </signal>"
+  "    <signal name='TriggerTriggered'>"
+  "      <arg name='dest' type='s'/>"
+  "      <arg name='describe' type='s'/>"
+  "    </signal>"
   "    <signal name='Stopped'>"
   "      <arg name='reason' type='s'/>"
   "      <arg name='id' type='s'/>"
@@ -637,6 +645,29 @@ idle_emit_stopped (gpointer data)
   return G_SOURCE_REMOVE;
 }
 
+typedef struct
+{
+  STDbgMockServer *self;
+  gchar *signal_name;
+  gchar *dest;
+  gchar *describe;
+} DestDescribeIdle;
+
+static gboolean
+idle_emit_dest_describe (gpointer data)
+{
+  DestDescribeIdle *p = data;
+
+  broadcast_signal (p->self, p->signal_name,
+		    g_variant_new ("(ss)", p->dest,
+				   p->describe ? p->describe : ""));
+  g_free (p->signal_name);
+  g_free (p->dest);
+  g_free (p->describe);
+  g_free (p);
+  return G_SOURCE_REMOVE;
+}
+
 STDbgMockServer *
 st_dbg_mock_server_start (GError ** error)
 {
@@ -849,6 +880,40 @@ st_dbg_mock_server_emit_stopped (STDbgMockServer * self, const gchar * reason,
   p->value = value;
   p->handle = handle;
   g_main_context_invoke (self->context, idle_emit_stopped, p);
+}
+
+void
+st_dbg_mock_server_emit_rule_triggered (STDbgMockServer * self,
+					const gchar * dest,
+					const gchar * describe)
+{
+  DestDescribeIdle *p;
+
+  g_return_if_fail (self != NULL);
+  g_return_if_fail (dest != NULL);
+  p = g_new0 (DestDescribeIdle, 1);
+  p->self = self;
+  p->signal_name = g_strdup ("RuleTriggered");
+  p->dest = g_strdup (dest);
+  p->describe = g_strdup (describe ? describe : "");
+  g_main_context_invoke (self->context, idle_emit_dest_describe, p);
+}
+
+void
+st_dbg_mock_server_emit_trigger_triggered (STDbgMockServer * self,
+					   const gchar * dest,
+					   const gchar * describe)
+{
+  DestDescribeIdle *p;
+
+  g_return_if_fail (self != NULL);
+  g_return_if_fail (dest != NULL);
+  p = g_new0 (DestDescribeIdle, 1);
+  p->self = self;
+  p->signal_name = g_strdup ("TriggerTriggered");
+  p->dest = g_strdup (dest);
+  p->describe = g_strdup (describe ? describe : "");
+  g_main_context_invoke (self->context, idle_emit_dest_describe, p);
 }
 
 gboolean

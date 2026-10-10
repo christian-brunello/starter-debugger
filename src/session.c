@@ -68,6 +68,8 @@ struct _STDbgSession
   guint signal_stats;
   guint signal_var;
   guint signal_stopped;
+  guint signal_rule;
+  guint signal_trigger;
 
   STDbgAsyncPrintFunc async_begin;
   STDbgAsyncPrintFunc async_end;
@@ -378,6 +380,46 @@ on_stopped (GDBusConnection * connection, const gchar * sender_name,
 }
 
 static void
+on_rule_triggered (GDBusConnection * connection, const gchar * sender_name,
+		   const gchar * object_path, const gchar * interface_name,
+		   const gchar * signal_name, GVariant * parameters,
+		   gpointer user_data)
+{
+  STDbgSession *self = user_data;
+  const gchar *dest = NULL;
+  const gchar *describe = NULL;
+
+  (void) connection;
+  (void) sender_name;
+  (void) object_path;
+  (void) interface_name;
+  (void) signal_name;
+  g_variant_get (parameters, "(&s&s)", &dest, &describe);
+  monitor_printf (self, ST_DBG_MON_RULES, "RuleTriggered on %s => %s", dest,
+		  describe ? describe : "");
+}
+
+static void
+on_trigger_triggered (GDBusConnection * connection, const gchar * sender_name,
+		      const gchar * object_path, const gchar * interface_name,
+		      const gchar * signal_name, GVariant * parameters,
+		      gpointer user_data)
+{
+  STDbgSession *self = user_data;
+  const gchar *dest = NULL;
+  const gchar *describe = NULL;
+
+  (void) connection;
+  (void) sender_name;
+  (void) object_path;
+  (void) interface_name;
+  (void) signal_name;
+  g_variant_get (parameters, "(&s&s)", &dest, &describe);
+  monitor_printf (self, ST_DBG_MON_TRIGGERS, "TriggerTriggered on %s => %s",
+		  dest, describe ? describe : "");
+}
+
+static void
 unsubscribe_all (STDbgSession * self)
 {
   if (self->conn == NULL)
@@ -395,6 +437,10 @@ unsubscribe_all (STDbgSession * self)
     g_dbus_connection_signal_unsubscribe (self->conn, self->signal_var);
   if (self->signal_stopped)
     g_dbus_connection_signal_unsubscribe (self->conn, self->signal_stopped);
+  if (self->signal_rule)
+    g_dbus_connection_signal_unsubscribe (self->conn, self->signal_rule);
+  if (self->signal_trigger)
+    g_dbus_connection_signal_unsubscribe (self->conn, self->signal_trigger);
 
   self->signal_peer = 0;
   self->signal_input = 0;
@@ -402,6 +448,8 @@ unsubscribe_all (STDbgSession * self)
   self->signal_stats = 0;
   self->signal_var = 0;
   self->signal_stopped = 0;
+  self->signal_rule = 0;
+  self->signal_trigger = 0;
 }
 
 static void
@@ -437,6 +485,16 @@ subscribe_all (STDbgSession * self)
 					"Stopped", ST_DBG_OBJECT_PATH, NULL,
 					G_DBUS_SIGNAL_FLAGS_NONE, on_stopped,
 					self, NULL);
+  self->signal_rule =
+    g_dbus_connection_signal_subscribe (self->conn, NULL, ST_DBG_INTERFACE,
+					"RuleTriggered", ST_DBG_OBJECT_PATH,
+					NULL, G_DBUS_SIGNAL_FLAGS_NONE,
+					on_rule_triggered, self, NULL);
+  self->signal_trigger =
+    g_dbus_connection_signal_subscribe (self->conn, NULL, ST_DBG_INTERFACE,
+					"TriggerTriggered", ST_DBG_OBJECT_PATH,
+					NULL, G_DBUS_SIGNAL_FLAGS_NONE,
+					on_trigger_triggered, self, NULL);
 }
 
 static gboolean
@@ -916,6 +974,14 @@ st_dbg_session_parse_monitor_channel (const gchar * name, guint * bits_out)
   else if (g_ascii_strcasecmp (name, "stopped") == 0
 	   || g_ascii_strcasecmp (name, "stop") == 0)
     bits = ST_DBG_MON_STOPPED;
+  else if (g_ascii_strcasecmp (name, "rules") == 0
+	   || g_ascii_strcasecmp (name, "rule") == 0)
+    bits = ST_DBG_MON_RULES;
+  else if (g_ascii_strcasecmp (name, "triggers") == 0
+	   || g_ascii_strcasecmp (name, "trigger") == 0)
+    bits = ST_DBG_MON_TRIGGERS;
+  else if (g_ascii_strcasecmp (name, "engine") == 0)
+    bits = ST_DBG_MON_RULES | ST_DBG_MON_TRIGGERS;
   else
     return FALSE;
 
@@ -958,6 +1024,8 @@ st_dbg_session_print_monitor (STDbgSession * self)
   append_channel (s, self->monitor_mask, ST_DBG_MON_VARS, "vars");
   append_channel (s, self->monitor_mask, ST_DBG_MON_PEERS, "peers");
   append_channel (s, self->monitor_mask, ST_DBG_MON_STOPPED, "stopped");
+  append_channel (s, self->monitor_mask, ST_DBG_MON_RULES, "rules");
+  append_channel (s, self->monitor_mask, ST_DBG_MON_TRIGGERS, "triggers");
   g_print ("monitor: %s\n", s->str);
 }
 
